@@ -22,12 +22,24 @@ def create_bitbake_include(spec, specfn):
 
 	bbincludefile = open(bbincludefn,'w')
 	if bbincludefile:
+		tmp = 'FILESEXTRAPATHS_prepend := \"${THISDIR}/centos:\"\n'
+		bbincludefile.writelines(tmp)
+		
+		for source in spec.sources:
+			tmp = replace_macros(source, spec)
+			
+			if '%' not in tmp:
+				tmp = tmp.split('#')
+				tmp = 'CENTOS_SRC = \"' + tmp[0] + '\" \n\n'
+				bbincludefile.writelines(tmp)
+				break
+		
 		bbincludefile.writelines('CENTOS_PATCHES = \" \\\n')
 		
 		for patch in spec.patches:
 			tmp = '\t file://' + patch + ' \\\n'
 			bbincludefile.writelines(tmp)
-	
+		
 		bbincludefile.writelines('\t\"\n')
 		
 		bbincludefile.close()
